@@ -10,7 +10,39 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        Text("Hello, World!")
+        HStack {
+            ForEach(0..<4) { index in
+                CardView(isFaseUp: true)
+            }
+        }
+        .padding()
+        .foregroundColor(.orange)
+        .font(.largeTitle)
+    }
+}
+
+struct CardView: View {
+    
+    private struct Constants {
+        static let cornerRadius: CGFloat = 10
+        static let lineWidth: CGFloat = 3
+    }
+    
+    var isFaseUp: Bool
+    
+    var body: some View {
+        ZStack {
+            if isFaseUp {
+                RoundedRectangle(cornerRadius: Constants.cornerRadius)
+                    .fill(Color.white)
+                RoundedRectangle(cornerRadius: Constants.cornerRadius)
+                    .stroke(lineWidth: Constants.lineWidth)
+                Text("👻")
+            } else {
+                RoundedRectangle(cornerRadius: Constants.cornerRadius)
+                    .fill()
+            }
+        }
     }
 }
 
