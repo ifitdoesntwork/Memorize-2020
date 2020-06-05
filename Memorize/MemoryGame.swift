@@ -26,6 +26,7 @@ struct MemoryGame<CardContent> {
                     Card(id: pairIndex * 2 + 1, content: content)
                 ]
             }
+            .shuffled()
     }
     
     var cards: [Card]
