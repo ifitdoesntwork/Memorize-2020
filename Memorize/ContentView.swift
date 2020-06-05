@@ -23,7 +23,7 @@ struct ContentView: View {
         }
         .padding()
         .foregroundColor(.orange)
-        .font(.largeTitle)
+        .font(viewModel.cards.count == 10 ? .body : .largeTitle)
     }
 }
 
