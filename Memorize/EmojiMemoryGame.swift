@@ -8,11 +8,11 @@
 
 import Foundation
 
-class EmojiMemoryGame {
+class EmojiMemoryGame: ObservableObject {
     
     typealias EmojiGame = MemoryGame<String>
     
-    private var model = EmojiMemoryGame.createMemoryGame()
+    @Published private var model = EmojiMemoryGame.createMemoryGame()
     
     private static func createMemoryGame() -> EmojiGame {
         let emojis = ["👻", "🎃", "🕷", "🧙‍♀️", "🦇", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"]
