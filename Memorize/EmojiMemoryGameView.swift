@@ -25,16 +25,6 @@ struct EmojiMemoryGameView: View {
     }
 }
 
-private extension EmojiMemoryGame.Color {
-    
-    var uiColor: SwiftUI.Color {
-        switch self {
-        case .orange:
-            return .orange
-        }
-    }
-}
-
 struct CardView: View {
     
     let card: MemoryGame<String>.Card
@@ -69,6 +59,28 @@ struct CardView: View {
     private let edgeLineWidth: CGFloat = 3
     private func fontSize(for size: CGSize) -> CGFloat {
         min(size.width, size.height) * 0.75
+    }
+}
+
+private extension EmojiMemoryGame.Color {
+    
+    var uiColor: SwiftUI.Color {
+        switch self {
+        case .orange:
+            return .orange
+        case .red:
+            return .red
+        case .yellow:
+            return .yellow
+        case .green:
+            return .green
+        case .cyan:
+            return .pink
+        case .blue:
+            return .blue
+        case .magenta:
+            return .purple
+        }
     }
 }
 
