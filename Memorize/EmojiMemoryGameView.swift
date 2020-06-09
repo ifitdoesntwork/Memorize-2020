@@ -14,6 +14,7 @@ struct EmojiMemoryGameView: View {
     
     var body: some View {
         VStack {
+            Text(self.viewModel.name)
             Button("New Game") {
                 self.viewModel.restart()
             }

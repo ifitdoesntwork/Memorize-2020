@@ -22,13 +22,11 @@ class EmojiMemoryGame: ObservableObject {
         case magenta
     }
     
-    fileprivate struct Theme {
-        
-        let name: String
-        let emoji: [String]
-        /// `nil` means random number of cards
-        let numberOfPairsOfCards: Int?
-        let color: Color
+    enum Theme: CaseIterable {
+        case halloween
+        case animals
+        case sports
+        case faces
     }
     
     private var theme: Theme = .halloween
@@ -37,7 +35,11 @@ class EmojiMemoryGame: ObservableObject {
         theme.color
     }
     
-    @Published private var model = EmojiMemoryGame.createMemoryGame(theme: .halloween)
+    var name: String {
+        theme.name
+    }
+    
+    @Published private var model = EmojiMemoryGame.createMemoryGame(theme: Theme.allCases.shuffled().first!)
 
     private static func createMemoryGame(theme: Theme) -> EmojiGame {
         
@@ -65,44 +67,54 @@ class EmojiMemoryGame: ObservableObject {
     }
     
     func restart() {
-        theme = .random
+        theme = Theme.allCases.shuffled().first!
         model = EmojiMemoryGame.createMemoryGame(theme: theme)
     }
 }
 
 private extension EmojiMemoryGame.Theme {
     
-    static let halloween = Self(
-        name: "Halloween",
-        emoji: ["👻", "🎃", "🕷", "🧙‍♀️", "🦇"],
-        numberOfPairsOfCards: 4,
-        color: .orange
-    )
+    var name: String {
+        "\(self)".capitalized
+    }
     
-    static let animals = Self(
-        name: "Animals",
-        emoji: ["🐼", "🐔", "🦄", "🦊"],
-        numberOfPairsOfCards: 2,
-        color: .green
-    )
+    var emoji: [String] {
+        switch self {
+        case .halloween:
+            return ["👻", "🎃", "🕷", "🧙‍♀️", "🦇"]
+        case .animals:
+            return ["🐼", "🐔", "🦄", "🦊"]
+        case .sports:
+            return ["🏀", "🏈", "⚾"]
+        case .faces:
+            return ["😀", "😢", "😉", "😍", "🙄"]
+        }
+    }
     
-    static let sports = Self(
-        name: "Sports",
-        emoji: ["🏀", "🏈", "⚾"],
-        numberOfPairsOfCards: 8, // intentionally broken theme
-        color: .blue
-    )
+    /// `nil` means random number of cards
+    var numberOfPairsOfCards: Int? {
+        switch self {
+        case .halloween:
+            return 4
+        case .animals:
+            return 2
+        case .sports:
+            return 8 // intentionally broken theme
+        case .faces:
+            return nil
+        }
+    }
     
-    static let faces = Self(
-        name: "Faces",
-        emoji: ["😀", "😢", "😉", "😍", "🙄"],
-        numberOfPairsOfCards: nil,
-        color: .yellow
-    )
-    
-    static var random: Self {
-        [.halloween, .animals, .sports, .faces]
-            .shuffled()
-            .first!
+    var color: EmojiMemoryGame.Color {
+        switch self {
+        case .halloween:
+            return .orange
+        case .animals:
+            return .green
+        case .sports:
+            return .blue
+        case .faces:
+            return .yellow
+        }
     }
 }
