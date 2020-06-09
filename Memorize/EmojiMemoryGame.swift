@@ -12,13 +12,44 @@ class EmojiMemoryGame: ObservableObject {
     
     typealias EmojiGame = MemoryGame<String>
     
-    @Published private var model = EmojiMemoryGame.createMemoryGame()
+    enum Color {
+        case orange
+    }
     
-    private static func createMemoryGame() -> EmojiGame {
-        let emojis = ["👻", "🎃", "🕷", "🧙‍♀️", "🦇", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"]
-            .shuffled()
-        return EmojiGame(numberOfPairsOfCards: Int.random(in: 2...5)) { pairIndex in
-            emojis[pairIndex]
+    private struct Theme {
+        
+        let name: String
+        let emoji: [String]
+        /// `nil` means random number of cards
+        let numberOfPairsOfCards: Int?
+        let color: Color
+        
+        static let halloween = Theme(
+            name: "halloween",
+            emoji: ["👻", "🎃", "🕷", "🧙‍♀️", "🦇"],
+            numberOfPairsOfCards: 4,
+            color: .orange
+        )
+    }
+    
+    private var theme: Theme = .halloween
+    
+    var color: Color {
+        theme.color
+    }
+    
+    @Published private var model = EmojiMemoryGame.createMemoryGame(theme: .halloween)
+
+    private static func createMemoryGame(theme: Theme) -> EmojiGame {
+        
+        let emoji = theme.emoji.shuffled()
+        
+        let numberOfPairsOfCards = theme.numberOfPairsOfCards
+            .map { min($0, emoji.count) }
+            ?? Int.random(in: 2...emoji.count)
+        
+        return EmojiGame(numberOfPairsOfCards: numberOfPairsOfCards) { pairIndex in
+            emoji[pairIndex]
         }
     }
     

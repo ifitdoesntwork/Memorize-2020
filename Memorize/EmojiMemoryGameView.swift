@@ -21,7 +21,17 @@ struct EmojiMemoryGameView: View {
                 }
         }
         .padding()
-        .foregroundColor(.orange)
+        .foregroundColor(viewModel.color.uiColor)
+    }
+}
+
+private extension EmojiMemoryGame.Color {
+    
+    var uiColor: SwiftUI.Color {
+        switch self {
+        case .orange:
+            return .orange
+        }
     }
 }
 
