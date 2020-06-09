@@ -63,6 +63,11 @@ class EmojiMemoryGame: ObservableObject {
     func choose(card: EmojiGame.Card) {
         model.choose(card: card)
     }
+    
+    func restart() {
+        theme = .random
+        model = EmojiMemoryGame.createMemoryGame(theme: theme)
+    }
 }
 
 private extension EmojiMemoryGame.Theme {
@@ -94,4 +99,10 @@ private extension EmojiMemoryGame.Theme {
         numberOfPairsOfCards: nil,
         color: .yellow
     )
+    
+    static var random: Self {
+        [.halloween, .animals, .sports, .faces]
+            .shuffled()
+            .first!
+    }
 }
