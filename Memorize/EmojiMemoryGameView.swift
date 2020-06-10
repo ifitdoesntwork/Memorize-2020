@@ -24,7 +24,7 @@ struct EmojiMemoryGameView: View {
             .padding(.horizontal)
             
             Grid(viewModel.cards) { card in
-                CardView(card: card)
+                CardView(card: card, colors: self.viewModel.color.uiColors)
                     .padding(5)
                     .onTapGesture {
                         self.viewModel.choose(card: card)
@@ -34,19 +34,19 @@ struct EmojiMemoryGameView: View {
             Text("Score: \(viewModel.score)")
         }
         .padding()
-        .foregroundColor(viewModel.color.uiColor)
+        .foregroundColor(viewModel.color.uiColors.primary)
     }
 }
 
 struct CardView: View {
     
     let card: MemoryGame<String>.Card
+    fileprivate let colors: EmojiMemoryGame.Color.UIColors
     
     var body: some View {
         GeometryReader { geometry in
             self.body(for: geometry.size)
         }
-        .aspectRatio(2/3, contentMode: .fit)
     }
     
     private func body(for size: CGSize) -> some View {
@@ -60,7 +60,12 @@ struct CardView: View {
             } else {
                 if !card.isMatched {
                     RoundedRectangle(cornerRadius: cornerRadius)
-                        .fill()
+                        .fill(RadialGradient(
+                            gradient: .init(colors: [colors.primary, colors.secondary]),
+                            center: .center,
+                            startRadius: gradientStartRadius,
+                            endRadius: max(size.width, size.height)
+                        ))
                 }
             }
         }
@@ -71,6 +76,7 @@ struct CardView: View {
     
     private let cornerRadius: CGFloat = 10
     private let edgeLineWidth: CGFloat = 3
+    private let gradientStartRadius: CGFloat = 30
     private func fontSize(for size: CGSize) -> CGFloat {
         min(size.width, size.height) * 0.75
     }
@@ -78,22 +84,27 @@ struct CardView: View {
 
 private extension EmojiMemoryGame.Color {
     
-    var uiColor: SwiftUI.Color {
+    struct UIColors {
+        let primary: SwiftUI.Color
+        let secondary: SwiftUI.Color
+    }
+    
+    var uiColors: UIColors {
         switch self {
         case .orange:
-            return .orange
+            return .init(primary: .orange, secondary: .yellow)
         case .red:
-            return .red
+            return .init(primary: .red, secondary: .orange)
         case .yellow:
-            return .yellow
+            return .init(primary: .yellow, secondary: .white)
         case .green:
-            return .green
+            return .init(primary: .green, secondary: .yellow)
         case .cyan:
-            return .pink
+            return .init(primary: .blue, secondary: .pink)
         case .blue:
-            return .blue
+            return .init(primary: .blue, secondary: .purple)
         case .magenta:
-            return .purple
+            return .init(primary: .purple, secondary: .pink)
         }
     }
 }
