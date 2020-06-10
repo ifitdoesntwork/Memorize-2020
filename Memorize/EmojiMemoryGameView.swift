@@ -14,10 +14,15 @@ struct EmojiMemoryGameView: View {
     
     var body: some View {
         VStack {
-            Text(self.viewModel.name)
-            Button("New Game") {
-                self.viewModel.restart()
+            HStack {
+                Text(self.viewModel.name)
+                Spacer()
+                Button("New Game") {
+                    self.viewModel.restart()
+                }
             }
+            .padding(.horizontal)
+            
             Grid(viewModel.cards) { card in
                 CardView(card: card)
                     .padding(5)

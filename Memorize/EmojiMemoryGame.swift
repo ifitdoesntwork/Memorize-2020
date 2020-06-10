@@ -22,14 +22,14 @@ class EmojiMemoryGame: ObservableObject {
         case magenta
     }
     
-    enum Theme: CaseIterable {
+    fileprivate enum Theme: CaseIterable {
         case halloween
         case animals
         case sports
         case faces
     }
     
-    private var theme: Theme = .halloween
+    private var theme: Theme
     
     var color: Color {
         theme.color
@@ -39,7 +39,13 @@ class EmojiMemoryGame: ObservableObject {
         theme.name
     }
     
-    @Published private var model = EmojiMemoryGame.createMemoryGame(theme: Theme.allCases.shuffled().first!)
+    @Published private var model: EmojiGame
+    
+    init() {
+        theme = Theme.allCases
+            .randomElement()!
+        model = EmojiMemoryGame.createMemoryGame(theme: theme)
+    }
 
     private static func createMemoryGame(theme: Theme) -> EmojiGame {
         
@@ -67,7 +73,9 @@ class EmojiMemoryGame: ObservableObject {
     }
     
     func restart() {
-        theme = Theme.allCases.shuffled().first!
+        theme = Theme.allCases
+            .shuffled()
+            .first { $0 != theme }!
         model = EmojiMemoryGame.createMemoryGame(theme: theme)
     }
 }
