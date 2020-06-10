@@ -30,6 +30,8 @@ struct EmojiMemoryGameView: View {
                         self.viewModel.choose(card: card)
                     }
             }
+            
+            Text("Score: \(viewModel.score)")
         }
         .padding()
         .foregroundColor(viewModel.color.uiColor)
@@ -44,6 +46,7 @@ struct CardView: View {
         GeometryReader { geometry in
             self.body(for: geometry.size)
         }
+        .aspectRatio(2/3, contentMode: .fit)
     }
     
     private func body(for size: CGSize) -> some View {

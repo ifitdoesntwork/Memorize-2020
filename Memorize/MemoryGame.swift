@@ -14,6 +14,7 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
         var id: Int
         var isFaceUp: Bool = false
         var isMatched: Bool = false
+        var isPreviouslySeen: Bool = false
         var content: CardContent
     }
     
@@ -29,7 +30,9 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
             .shuffled()
     }
     
-    var cards: [Card]
+    private(set) var cards: [Card]
+    
+    private(set) var score: Int = 0
     
     private var indexOfTheOneAndOnlyFaceUpCard: Int? {
         get {
@@ -54,6 +57,14 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
                 if cards[chosenIndex].content == cards[potentialMatchIndex].content {
                     cards[chosenIndex].isMatched = true
                     cards[potentialMatchIndex].isMatched = true
+                    score += 2
+                } else {
+                    [chosenIndex, potentialMatchIndex].forEach { index in
+                        if cards[index].isPreviouslySeen {
+                            score -= 1
+                        }
+                        cards[index].isPreviouslySeen = true
+                    }
                 }
                 cards[chosenIndex].isFaceUp = true
             } else {
