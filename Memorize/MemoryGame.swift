@@ -34,6 +34,8 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
     
     private(set) var score: Int = 0
     
+    private var momentOfChoice = Date()
+    
     private var indexOfTheOneAndOnlyFaceUpCard: Int? {
         get {
             cards.indices
@@ -54,14 +56,20 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
             !cards[chosenIndex].isMatched
         {
             if let potentialMatchIndex = indexOfTheOneAndOnlyFaceUpCard {
+                
+                let timeFactor = max(
+                    10 - Int(Date().timeIntervalSince(momentOfChoice)),
+                    1
+                )
+                
                 if cards[chosenIndex].content == cards[potentialMatchIndex].content {
                     cards[chosenIndex].isMatched = true
                     cards[potentialMatchIndex].isMatched = true
-                    score += 2
+                    score += 2 * timeFactor
                 } else {
                     [chosenIndex, potentialMatchIndex].forEach { index in
                         if cards[index].isPreviouslySeen {
-                            score -= 1
+                            score -= 1 * timeFactor
                         }
                         cards[index].isPreviouslySeen = true
                     }
@@ -70,6 +78,7 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
             } else {
                 indexOfTheOneAndOnlyFaceUpCard = chosenIndex
             }
+            momentOfChoice = Date()
         }
     }
 }
