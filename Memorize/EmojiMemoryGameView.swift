@@ -41,7 +41,7 @@ struct EmojiMemoryGameView: View {
 struct CardView: View {
     
     let card: MemoryGame<String>.Card
-    fileprivate let colors: EmojiMemoryGame.Color.UIColors
+    let colors: Cardify.Colors
     
     var body: some View {
         GeometryReader { geometry in
@@ -49,34 +49,23 @@ struct CardView: View {
         }
     }
     
-    private func body(for size: CGSize) -> some View {
-        ZStack {
-            if self.card.isFaceUp {
-                RoundedRectangle(cornerRadius: cornerRadius)
-                    .fill(Color.white)
-                RoundedRectangle(cornerRadius: cornerRadius)
-                    .stroke(lineWidth: edgeLineWidth)
-                Text(self.card.content)
-            } else {
-                if !card.isMatched {
-                    RoundedRectangle(cornerRadius: cornerRadius)
-                        .fill(RadialGradient(
-                            gradient: .init(colors: [colors.primary, colors.secondary]),
-                            center: .center,
-                            startRadius: gradientStartRadius,
-                            endRadius: max(size.width, size.height)
-                        ))
-                }
+    @ViewBuilder private func body(for size: CGSize) -> some View {
+        if card.isFaceUp || !card.isMatched {
+            ZStack {
+                Pie(startAngle: .degrees(360-90), endAngle: .degrees(110-90))
+                    .padding(piePadding)
+                    .opacity(pieOpacity)
+                Text(card.content)
+                    .font(.system(size: fontSize(for: size)))
             }
+            .cardify(isFaceUp: card.isFaceUp, colors: colors)
         }
-        .font(.system(size: fontSize(for: size)))
     }
     
     // MARK: - Drawing Constants
     
-    private let cornerRadius: CGFloat = 10
-    private let edgeLineWidth: CGFloat = 3
-    private let gradientStartRadius: CGFloat = 30
+    private let piePadding: CGFloat = 5
+    private let pieOpacity = 0.4
     private func fontSize(for size: CGSize) -> CGFloat {
         min(size.width, size.height) * 0.75
     }
@@ -84,12 +73,7 @@ struct CardView: View {
 
 private extension EmojiMemoryGame.Color {
     
-    struct UIColors {
-        let primary: SwiftUI.Color
-        let secondary: SwiftUI.Color
-    }
-    
-    var uiColors: UIColors {
+    var uiColors: Cardify.Colors {
         switch self {
         case .orange:
             return .init(primary: .orange, secondary: .yellow)
@@ -111,6 +95,8 @@ private extension EmojiMemoryGame.Color {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        EmojiMemoryGameView(viewModel: EmojiMemoryGame())
+        let game = EmojiMemoryGame()
+        game.choose(card: game.cards[0])
+        return EmojiMemoryGameView(viewModel: game)
     }
 }
