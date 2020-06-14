@@ -16,9 +16,12 @@ struct EmojiMemoryGameView: View {
         VStack {
             HStack {
                 Text(self.viewModel.name)
+                    .animation(.none)
                 Spacer()
                 Button("New Game") {
-                    self.viewModel.restart()
+                    withAnimation(.easeInOut) {
+                        self.viewModel.restart()
+                    }
                 }
             }
             .padding(.horizontal)
@@ -27,11 +30,14 @@ struct EmojiMemoryGameView: View {
                 CardView(card: card, colors: self.viewModel.color.uiColors)
                     .padding(5)
                     .onTapGesture {
-                        self.viewModel.choose(card: card)
+                        withAnimation(.linear(duration: 0.75)) {
+                            self.viewModel.choose(card: card)
+                        }
                     }
             }
             
             Text("Score: \(viewModel.score)")
+                .animation(.none)
         }
         .padding()
         .foregroundColor(viewModel.color.uiColors.primary)
@@ -52,14 +58,55 @@ struct CardView: View {
     @ViewBuilder private func body(for size: CGSize) -> some View {
         if card.isFaceUp || !card.isMatched {
             ZStack {
-                Pie(startAngle: .degrees(360-90), endAngle: .degrees(110-90))
-                    .padding(piePadding)
-                    .opacity(pieOpacity)
-                Text(card.content)
+                pie
+                emoji
                     .font(.system(size: fontSize(for: size)))
             }
             .cardify(isFaceUp: card.isFaceUp, colors: colors)
+            .transition(.scale)
         }
+    }
+    
+    @State private var animatedBonusRemaining: Double = 0
+    
+    private func startBonusTimeAnimation() {
+        animatedBonusRemaining = card.bonusRemaining
+        withAnimation(.linear(duration: card.bonusTimeRemaining)) {
+            animatedBonusRemaining = 0
+        }
+    }
+    
+    private var pie: some View {
+        Group {
+            if card.isConsumingBonusTime {
+                Pie(
+                    startAngle: .degrees(0 - 90),
+                    endAngle: .degrees(-animatedBonusRemaining * 360 - 90)
+                )
+                .onAppear {
+                    self.startBonusTimeAnimation()
+                }
+            } else {
+                Pie(
+                    startAngle: .degrees(0 - 90),
+                    endAngle: .degrees(-card.bonusRemaining * 360 - 90)
+                )
+            }
+        }
+        .padding(piePadding)
+        .opacity(pieOpacity)
+        .transition(.identity)
+    }
+    
+    private var emoji: some View {
+        Text(card.content)
+            .rotationEffect(.degrees(card.isMatched ? 360 : 0))
+            .animation(
+                card.isMatched
+                    ? Animation.linear(duration: 1)
+                        .repeatForever(autoreverses: false)
+                    : .default
+            )
     }
     
     // MARK: - Drawing Constants

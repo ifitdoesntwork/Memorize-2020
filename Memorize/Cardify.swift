@@ -8,15 +8,29 @@
 
 import SwiftUI
 
-struct Cardify: ViewModifier {
+struct Cardify: AnimatableModifier {
     
     struct Colors {
         let primary: SwiftUI.Color
         let secondary: SwiftUI.Color
     }
     
-    let isFaceUp: Bool
-    let colors: Colors
+    private var rotation: Double
+    private let colors: Colors
+    
+    init(isFaceUp: Bool, colors: Colors) {
+        rotation = isFaceUp ? 0 : 180
+        self.colors = colors
+    }
+    
+    private var isFaceUp: Bool {
+        rotation < 90
+    }
+    
+    var animatableData: Double {
+        get { rotation }
+        set { rotation = newValue }
+    }
     
     func body(content: Content) -> some View {
         GeometryReader { geometry in
@@ -26,18 +40,20 @@ struct Cardify: ViewModifier {
     
     private func body(for size: CGSize, content: Content) -> some View {
         ZStack {
-            if isFaceUp {
+            Group {
                 RoundedRectangle(cornerRadius: cornerRadius)
                     .fill(Color.white)
                 RoundedRectangle(cornerRadius: cornerRadius)
                     .stroke(lineWidth: edgeLineWidth)
                     .foregroundColor(colors.primary)
                 content
-            } else {
-                RoundedRectangle(cornerRadius: cornerRadius)
-                    .fill(radialGradient(for: size))
             }
+                .opacity(isFaceUp ? 1 : 0)
+            RoundedRectangle(cornerRadius: cornerRadius)
+                .fill(radialGradient(for: size))
+                .opacity(isFaceUp ? 0 : 1)
         }
+        .rotation3DEffect(.degrees(rotation), axis: (0, 1, 0))
     }
     
     private func radialGradient(for size: CGSize) -> RadialGradient {

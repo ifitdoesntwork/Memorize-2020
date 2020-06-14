@@ -12,10 +12,27 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
     
     struct Card: Identifiable {
         let id: Int
-        var isFaceUp: Bool = false
-        var isMatched: Bool = false
-        var isPreviouslySeen: Bool = false
         let content: CardContent
+        
+        var isFaceUp: Bool = false {
+            didSet {
+                if isFaceUp {
+                    startUsingBonusTime()
+                } else {
+                    stopUsingBonusTime()
+                }
+            }
+        }
+        var isMatched: Bool = false {
+            didSet {
+                if isMatched {
+                    stopUsingBonusTime()
+                }
+            }
+        }
+
+        var lastFaceUpDate: Date?
+        var pastFaceUpTime: TimeInterval = 0
     }
     
     init(numberOfPairsOfCards: Int, cardContentFactory: (Int) -> CardContent) {
@@ -33,8 +50,6 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
     private(set) var cards: [Card]
     
     private(set) var score: Int = 0
-    
-    private var momentOfChoice = Date()
     
     private var indexOfTheOneAndOnlyFaceUpCard: Int? {
         get {
@@ -57,28 +72,59 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
         {
             if let potentialMatchIndex = indexOfTheOneAndOnlyFaceUpCard {
                 
-                let timeFactor = max(
-                    10 - Int(Date().timeIntervalSince(momentOfChoice)),
-                    1
-                )
-                
                 if cards[chosenIndex].content == cards[potentialMatchIndex].content {
                     cards[chosenIndex].isMatched = true
                     cards[potentialMatchIndex].isMatched = true
-                    score += 2 * timeFactor
+                    [chosenIndex, potentialMatchIndex].forEach { index in
+                        score += Int(10 * cards[index].bonusRemaining)
+                    }
                 } else {
                     [chosenIndex, potentialMatchIndex].forEach { index in
-                        if cards[index].isPreviouslySeen {
-                            score -= 1 * timeFactor
+                        if cards[chosenIndex].pastFaceUpTime > 0 {
+                            score -= Int(5 * (1 - cards[index].bonusRemaining))
                         }
-                        cards[index].isPreviouslySeen = true
                     }
                 }
                 cards[chosenIndex].isFaceUp = true
             } else {
                 indexOfTheOneAndOnlyFaceUpCard = chosenIndex
             }
-            momentOfChoice = Date()
         }
+    }
+}
+
+// MARK: - Bonus Time
+
+extension MemoryGame.Card {
+    
+    private var bonusTimeLimit: TimeInterval { 6 }
+    
+    private var faceUpTime: TimeInterval {
+        pastFaceUpTime + (lastFaceUpDate.map { Date().timeIntervalSince($0) } ?? 0)
+    }
+    
+    var bonusTimeRemaining: TimeInterval {
+        max(0, bonusTimeLimit - faceUpTime)
+    }
+    
+    var bonusRemaining: Double {
+        (bonusTimeLimit > 0 && bonusTimeRemaining > 0)
+            ? bonusTimeRemaining / bonusTimeLimit
+            : 0
+    }
+    
+    var isConsumingBonusTime: Bool {
+        isFaceUp && !isMatched && bonusTimeRemaining > 0
+    }
+    
+    private mutating func startUsingBonusTime() {
+        if isConsumingBonusTime, lastFaceUpDate == nil {
+            lastFaceUpDate = Date()
+        }
+    }
+    
+    private mutating func stopUsingBonusTime() {
+        pastFaceUpTime = faceUpTime
+        self.lastFaceUpDate = nil
     }
 }
